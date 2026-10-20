@@ -18,7 +18,7 @@ Quando escrever ou alterar código, SEMPRE devolva o programa COMPLETO em um ún
 export const askAssistant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.GROQ_API_KEY;
+    const key = process.env["GROQ_API_KEY"];
     if (!key) return { reply: "A chave da IA não está configurada." };
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
