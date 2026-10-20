@@ -33,7 +33,7 @@ export function AssistantPanel({ code, sprites, onApply }: { code: string; sprit
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth" }), [msgs, loading]);
+  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;

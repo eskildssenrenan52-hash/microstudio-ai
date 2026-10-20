@@ -49,7 +49,7 @@ function Studio() {
     stopRef.current = createRuntime({ canvas: canvas.current, code: src, sprites, log: (msg, kind = "log") => setLogs((l) => [...l.slice(-100), { msg, kind }]) });
     setRunning(true);
   };
-  useEffect(() => stop, []);
+  useEffect(() => () => { stopRef.current?.(); }, []);
 
   const tabs: [Tab, string, typeof Code2][] = [["code", "Código", Code2], ["sprites", "Sprites", Palette], ["examples", "Exemplos", BookOpen]];
 
