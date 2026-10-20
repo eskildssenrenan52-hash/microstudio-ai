@@ -20,7 +20,7 @@ function Rendered({ text, onApply }: { text: string; onApply: (c: string) => voi
             <button onClick={() => onApply(p)} className="flex w-full items-center justify-center gap-1 bg-primary py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"><Wand2 className="h-3 w-3" /> Aplicar no editor</button>
           </div>
         ) : (
-          <p key={i} className="whitespace-pre-wrap">{p.trim()}</p>
+          <p key={i} className="whitespace-pre-wrap">{p.trim().replace(/\*\*/g, "")}</p>
         ),
       )}
     </>
@@ -33,7 +33,7 @@ export function AssistantPanel({ code, sprites, onApply }: { code: string; sprit
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth" }), [msgs, loading]);
+  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
