@@ -20,7 +20,7 @@ function Rendered({ text, onApply }: { text: string; onApply: (c: string) => voi
             <button onClick={() => onApply(p)} className="flex w-full items-center justify-center gap-1 bg-primary py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"><Wand2 className="h-3 w-3" /> Aplicar no editor</button>
           </div>
         ) : (
-          <p key={i} className="whitespace-pre-wrap">{p.trim()}</p>
+          <p key={i} className="whitespace-pre-wrap">{p.trim().replace(/\*\*/g, "")}</p>
         ),
       )}
     </>
