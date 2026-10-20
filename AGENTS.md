@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Game runtime lives in src/lib/engine.ts (client-only, JS with microStudio-style API); AI assistant calls Groq via server fn in src/lib/ai.functions.ts so the key stays server-side.
