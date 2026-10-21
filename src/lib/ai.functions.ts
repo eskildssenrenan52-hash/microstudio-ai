@@ -84,7 +84,8 @@ const gh = async (url: string) => {
 
 export const githubTool = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ name: z.string(), args: z.record(z.string(), z.any()) }).parse(d))
-  .handler(async ({ data: { name, args } }) => {
+  .handler(async ({ data }) => {
+    const { name } = data; const args = data.args as any;
     try {
       if (name === "search_github") {
         const r = await gh(`https://api.github.com/search/repositories?per_page=10&q=${encodeURIComponent(String(args.query))}`);

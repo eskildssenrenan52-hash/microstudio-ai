@@ -27,7 +27,7 @@ const SUGGESTIONS = ["Crie um jogo de plataforma com vários níveis, em vários
 
 const ICONS: Record<string, typeof FileText> = { list_files: FolderTree, read_file: FileText, write_file: Pencil, append_file: Pencil, edit_file: Pencil, delete_file: Trash2, list_sprites: ImageIcon, import_sprite: ImageIcon, run_game: Play, search_github: Search, list_github_files: Github, read_github_file: Github, ask_user: HelpCircle };
 
-function label(name: string, a: Record<string, unknown>) {
+function label(name: string, a: any) {
   const m: Record<string, string> = {
     list_files: "Listando arquivos do projeto", read_file: `Lendo ${a.path}`, write_file: `Escrevendo ${a.path}`, append_file: `Continuando ${a.path}`, edit_file: `Editando ${a.path}`, delete_file: `Apagando ${a.path}`,
     list_sprites: "Vendo os sprites", import_sprite: `Importando sprite "${a.name}"`, run_game: "Rodando o jogo para testar", search_github: `Pesquisando no GitHub: ${a.query}`,
@@ -88,7 +88,7 @@ export function AssistantPanel({ api }: { api: StudioApi }) {
     return `ESTADO ATUAL DO PROJETO\nArquivos:\n${Object.entries(f).map(([p, c]) => `- ${p} (${lines(c)} linhas)`).join("\n") || "(nenhum)"}\nSprites: ${Object.entries(s).map(([n, v]) => `${n} ${v.w}x${v.h}`).join(", ") || "nenhum"}\nConsole recente:\n${logs.join("\n") || "(vazio)"}\n${f["main.ts"] && f["main.ts"].length < 6000 ? `\nmain.ts:\n${f["main.ts"]}` : ""}`;
   };
 
-  const exec = async (name: string, a: Record<string, any>): Promise<string> => {
+  const exec = async (name: string, a: any): Promise<string> => {
     const files = { ...api.getFiles() };
     switch (name) {
       case "list_files": return Object.entries(files).map(([p, c]) => `${p} (${lines(c)} linhas)`).join("\n") || "(vazio)";
@@ -132,7 +132,7 @@ export function AssistantPanel({ api }: { api: StudioApi }) {
         if (!calls.length) break;
         let paused = false;
         for (const c of calls) {
-          let a: Record<string, any> = {};
+          let a: any = {};
           try { a = JSON.parse(c.function.arguments || "{}"); } catch { /* */ }
           const name = c.function.name;
           if (name === "ask_user") {

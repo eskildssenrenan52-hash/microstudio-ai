@@ -130,7 +130,7 @@ export function compileProject(files: Record<string, string>) {
     .sort((a, b) => Number(a === "main.ts") - Number(b === "main.ts") || a.localeCompare(b));
   return order
     .map((p) => {
-      const src = files[p].replace(/^\s*import\s[^\n]*$/gm, "").replace(/^(\s*)export\s+(default\s+)?/gm, "$1");
+      const src = (files[p] ?? "").replace(/^\s*import\s[^\n]*$/gm, "").replace(/^(\s*)export\s+(default\s+)?/gm, "$1");
       try {
         return `// ---- ${p} ----\n` + transform(src, { transforms: ["typescript"], filePath: p }).code;
       } catch (e) {
