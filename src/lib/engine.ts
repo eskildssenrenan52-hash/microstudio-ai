@@ -1,8 +1,10 @@
+import { transform } from "sucrase";
 // Mini game runtime inspired by microStudio: origin at center, y up, screen height = 200 units.
 export type SpriteMap = Record<string, { w: number; h: number; pixels: string[] }>;
 
-export const API_DOCS = `API do motor (JavaScript):
-Defina as funções init(), update() (60x por segundo) e draw().
+export const API_DOCS = `API do motor (TypeScript, vários arquivos):
+O projeto tem vários arquivos .ts que compartilham o MESMO escopo global (são concatenados em ordem alfabética, main.ts por último). Não use import/export: tudo declarado num arquivo é visível nos outros. Não redeclare o mesmo nome em dois arquivos.
+Defina (normalmente em main.ts) as funções init(), update() (60x por segundo) e draw().
 Coordenadas: centro da tela é (0,0), y para cima, altura da tela = 200 unidades. screen.width / screen.height.
 screen.clear(cor?) | screen.fillRect(x,y,w,h,cor) | screen.drawRect(x,y,w,h,cor)
 screen.fillRound(x,y,w,h,cor) (círculo/elipse) | screen.drawLine(x1,y1,x2,y2,cor)
@@ -44,11 +46,11 @@ function draw() {
 
 export function createRuntime(opts: {
   canvas: HTMLCanvasElement;
-  code: string;
+  files: Record<string, string>;
   sprites: SpriteMap;
   log: (msg: string, kind?: "log" | "error") => void;
 }) {
-  const { canvas, code, sprites, log } = opts;
+  const { canvas, files, sprites, log } = opts;
   const ctx = canvas.getContext("2d")!;
   const keys: Record<string, boolean> = {};
   const press: Record<string, boolean> = {};
@@ -100,6 +102,7 @@ export function createRuntime(opts: {
   let stopped = false;
   const stop = () => { stopped = true; cancelAnimationFrame(raf); window.removeEventListener("keydown", onDown); window.removeEventListener("keyup", onUp); canvas.removeEventListener("mousemove", onMove); canvas.removeEventListener("mousedown", onMDown); window.removeEventListener("mouseup", onMUp); };
   try {
+    const code = compileProject(files);
     const names = Object.keys(helpers);
     // eslint-disable-next-line no-new-func
     const factory = new Function(...names, `${code}\nreturn { init: typeof init==="function"?init:null, update: typeof update==="function"?update:null, draw: typeof draw==="function"?draw:null };`);
@@ -119,4 +122,20 @@ export function createRuntime(opts: {
   } catch (e) { log(String(e), "error"); stop(); }
   canvas.focus();
   return stop;
+}
+
+export function compileProject(files: Record<string, string>) {
+  const order = Object.keys(files)
+    .filter((p) => /\.(ts|js)$/.test(p))
+    .sort((a, b) => Number(a === "main.ts") - Number(b === "main.ts") || a.localeCompare(b));
+  return order
+    .map((p) => {
+      const src = (files[p] ?? "").replace(/^\s*import\s[^\n]*$/gm, "").replace(/^(\s*)export\s+(default\s+)?/gm, "$1");
+      try {
+        return `// ---- ${p} ----\n` + transform(src, { transforms: ["typescript"], filePath: p }).code;
+      } catch (e) {
+        throw new Error(`Erro em ${p}: ${(e as Error).message}`);
+      }
+    })
+    .join("\n");
 }
