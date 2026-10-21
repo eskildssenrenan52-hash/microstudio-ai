@@ -76,7 +76,7 @@ export const agentStep = createServerFn({ method: "POST" })
 const gh = async (url: string) => {
   const headers: Record<string, string> = { Accept: "application/vnd.github+json", "User-Agent": "PixelForge" };
   const t = process.env["GITHUB_TOKEN"];
-  if (t) headers.Authorization = `Bearer ${t}`;
+  if (t) headers["Authorization"] = `Bearer ${t}`;
   const r = await fetch(url, { headers });
   if (!r.ok) throw new Error(`GitHub ${r.status}: ${(await r.text()).slice(0, 200)}`);
   return r;

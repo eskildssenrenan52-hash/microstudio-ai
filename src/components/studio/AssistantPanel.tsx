@@ -47,8 +47,8 @@ function loadImageSprite(url: string, max: number): Promise<{ w: number; h: numb
       const w = Math.max(1, Math.round(img.width * r)), h = Math.max(1, Math.round(img.height * r));
       const c = document.createElement("canvas"); c.width = w; c.height = h;
       const g = c.getContext("2d")!; g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, w, h);
-      const d = g.getImageData(0, 0, w, h).data; const pixels: string[] = [];
-      for (let i = 0; i < d.length; i += 4) pixels.push(d[i + 3] < 128 ? "" : "#" + [d[i], d[i + 1], d[i + 2]].map((v) => v.toString(16).padStart(2, "0")).join(""));
+      const d = g.getImageData(0, 0, w, h).data as unknown as number[]; const pixels: string[] = [];
+      for (let i = 0; i < d.length; i += 4) pixels.push(d[i + 3]! < 128 ? "" : "#" + [d[i], d[i + 1], d[i + 2]].map((v) => (v ?? 0).toString(16).padStart(2, "0")).join(""));
       resolve({ w, h, pixels });
     };
     img.onerror = () => reject(new Error("não consegui carregar a imagem (URL inválida ou bloqueada)"));
@@ -97,8 +97,8 @@ export function AssistantPanel({ api }: { api: StudioApi }) {
         const ls = c.split("\n"); const s = Math.max(1, a.start ?? 1), e = Math.min(ls.length, a.end ?? s + 799);
         return ls.slice(s - 1, e).map((l, i) => `${s + i}| ${l}`).join("\n") + (e < ls.length ? `\n…(linhas ${e + 1}-${ls.length} restantes, use start/end)` : "");
       }
-      case "write_file": files[a.path] = String(a.content ?? ""); api.setFiles(files); api.openFile(a.path); return `OK, ${a.path} com ${lines(files[a.path])} linhas.`;
-      case "append_file": files[a.path] = (files[a.path] ?? "") + String(a.content ?? ""); api.setFiles(files); return `OK, ${a.path} agora tem ${lines(files[a.path])} linhas.`;
+      case "write_file": files[a.path] = String(a.content ?? ""); api.setFiles(files); api.openFile(a.path); return `OK, ${a.path} com ${lines(files[a.path] ?? "")} linhas.`;
+      case "append_file": files[a.path] = (files[a.path] ?? "") + String(a.content ?? ""); api.setFiles(files); return `OK, ${a.path} agora tem ${lines(files[a.path] ?? "")} linhas.`;
       case "edit_file": {
         const c = files[a.path]; if (c == null) return `Arquivo ${a.path} não existe.`;
         if (!c.includes(a.find)) return "Trecho não encontrado. Leia o arquivo de novo e use o texto exato.";
@@ -170,7 +170,7 @@ export function AssistantPanel({ api }: { api: StudioApi }) {
           return (
             <div key={i} className="rounded-lg border border-primary bg-card p-3">
               <div className="mb-2 flex items-center gap-1 font-semibold"><HelpCircle className="h-4 w-4 text-primary" /> {m.text}</div>
-              <div className="flex flex-wrap gap-2">{m.options.map((o) => <button key={o} disabled={busy} onClick={() => send(o)} className="rounded-md border border-border px-2 py-1 text-xs hover:border-primary">{o}</button>)}</div>
+              <div className="flex flex-wrap gap-2">{(m as { options: string[] }).options.map((o) => <button key={o} disabled={busy} onClick={() => send(o)} className="rounded-md border border-border px-2 py-1 text-xs hover:border-primary">{o}</button>)}</div>
             </div>
           );
         })}
